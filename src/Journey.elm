@@ -33,15 +33,20 @@ type Selected id
     | Selected id
 
 
+type Status
+    = Close
+    | Open
+
+
 type Step
-    = StartStep (Selected Start) (Payload String)
-    | BuildingStep (Selected Building) (Payload String)
+    = StartStep (Selected Start) (Payload String) Status
+    | BuildingStep (Selected Building) (Payload String) Status
 
 
 isStart : Step -> Bool
 isStart step =
     case step of
-        StartStep _ _ ->
+        StartStep _ _ _ ->
             True
 
         _ ->
@@ -51,7 +56,7 @@ isStart step =
 isBuilding : Step -> Bool
 isBuilding step =
     case step of
-        StartStep _ _ ->
+        StartStep _ _ _ ->
             True
 
         _ ->
@@ -61,17 +66,17 @@ isBuilding step =
 isOptionSelected : Step -> Bool
 isOptionSelected step =
     case step of
-        StartStep selected _ ->
+        StartStep selected _ _ ->
             selected /= NoSelected
 
-        BuildingStep selected _ ->
+        BuildingStep selected _ _ ->
             selected /= NoSelected
 
 
 labelForSelectedOption : Step -> StepLabel
 labelForSelectedOption step =
     case step of
-        StartStep selected _ ->
+        StartStep selected _ _ ->
             case selected of
                 Selected option ->
                     startGetOptionLabel option
@@ -79,7 +84,7 @@ labelForSelectedOption step =
                 NoSelected ->
                     ""
 
-        BuildingStep selected _ ->
+        BuildingStep selected _ _ ->
             case selected of
                 Selected option ->
                     buildingGetOptionLabel option
@@ -115,14 +120,14 @@ type Start
 
 start : Step
 start =
-    StartStep NoSelected NoVal
+    StartStep NoSelected NoVal Open
 
 
 startUpdate : Start -> Step
 startUpdate opt =
     let
         step =
-            \payload -> StartStep (Selected opt) (Payload payload)
+            \payload -> StartStep (Selected opt) (Payload payload) Open
     in
     case opt of
         NewConnection ->
@@ -184,14 +189,14 @@ type Building
 
 building : Step
 building =
-    BuildingStep NoSelected NoVal
+    BuildingStep NoSelected NoVal Open
 
 
 buildingUpdate : Building -> Step
 buildingUpdate opt =
     let
         step =
-            \payload -> BuildingStep (Selected opt) (Payload payload)
+            \payload -> BuildingStep (Selected opt) (Payload payload) Open
     in
     case opt of
         DetachedHouse ->
