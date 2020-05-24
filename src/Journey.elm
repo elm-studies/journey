@@ -127,7 +127,7 @@ startUpdate : Start -> Step
 startUpdate opt =
     let
         step =
-            \payload -> StartStep (Selected opt) (Payload payload) Open
+            \payload -> StartStep (Selected opt) (Payload payload) Close
     in
     case opt of
         NewConnection ->
@@ -196,7 +196,7 @@ buildingUpdate : Building -> Step
 buildingUpdate opt =
     let
         step =
-            \payload -> BuildingStep (Selected opt) (Payload payload) Open
+            \payload -> BuildingStep (Selected opt) (Payload payload) Close
     in
     case opt of
         DetachedHouse ->
