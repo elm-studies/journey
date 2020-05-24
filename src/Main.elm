@@ -15,6 +15,7 @@ type Msg
     = NoOp
     | UpdateStartStep Journey.Start
     | UpdateBuildingStep Journey.Building
+    | ToggleStepStatus Journey.Step
 
 
 init : ( Model, Cmd Msg )
@@ -38,6 +39,13 @@ update msg model =
         UpdateBuildingStep opt ->
             ( { model
                 | journeyStep = Journey.buildingUpdate opt
+              }
+            , Cmd.none
+            )
+
+        ToggleStepStatus step ->
+            ( { model
+                | journeyStep = Journey.toggleStepStatus step
               }
             , Cmd.none
             )
@@ -74,7 +82,7 @@ printStepOpen msg labels options =
 
 printStepClose : Journey.Step -> Html Msg
 printStepClose journeyStep =
-    div []
+    div [ onClick (ToggleStepStatus journeyStep) ]
         [ text (Journey.labelForSelectedOption journeyStep)
         ]
 
@@ -83,10 +91,7 @@ view : Model -> Html Msg
 view model =
     div []
         [ h1 [] [ text "Your Journey" ]
-        , if Journey.isOptionSelected model.journeyStep then
-            printStepClose model.journeyStep
-
-          else
+        , if Journey.isOpenStep model.journeyStep then
             let
                 step =
                     model.journeyStep
@@ -102,6 +107,9 @@ view model =
                     UpdateBuildingStep
                     Journey.buildingGetOptionLabel
                     Journey.buildingGetOptions
+
+          else
+            printStepClose model.journeyStep
         ]
 
 

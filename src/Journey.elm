@@ -7,13 +7,14 @@ module Journey exposing
     , buildingGetOptions
     , buildingUpdate
     , isBuilding
-    , isOptionSelected
+    , isOpenStep
     , isStart
     , labelForSelectedOption
     , start
     , startGetOptionLabel
     , startGetOptions
     , startUpdate
+    , toggleStepStatus
     )
 
 --import Html exposing (Html)
@@ -56,21 +57,21 @@ isStart step =
 isBuilding : Step -> Bool
 isBuilding step =
     case step of
-        StartStep _ _ _ ->
+        BuildingStep _ _ _ ->
             True
 
         _ ->
             False
 
 
-isOptionSelected : Step -> Bool
-isOptionSelected step =
+isOpenStep : Step -> Bool
+isOpenStep step =
     case step of
-        StartStep selected _ _ ->
-            selected /= NoSelected
+        StartStep _ _ status ->
+            status == Open
 
-        BuildingStep selected _ _ ->
-            selected /= NoSelected
+        BuildingStep _ _ status ->
+            status == Open
 
 
 labelForSelectedOption : Step -> StepLabel
@@ -91,6 +92,34 @@ labelForSelectedOption step =
 
                 NoSelected ->
                     ""
+
+
+toggleStatus : Status -> Status
+toggleStatus status =
+    case status of
+        Open ->
+            Close
+
+        Close ->
+            Open
+
+
+toggleStepStatus : Step -> Step
+toggleStepStatus step =
+    case step of
+        StartStep selected payload status ->
+            StartStep selected
+                payload
+                (toggleStatus
+                    status
+                )
+
+        BuildingStep selected payload status ->
+            BuildingStep selected
+                payload
+                (toggleStatus
+                    status
+                )
 
 
 
