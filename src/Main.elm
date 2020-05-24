@@ -61,6 +61,25 @@ initModel =
 -- VIEW ----
 
 
+doForOpenStep : Model -> Html Msg
+doForOpenStep model =
+    let
+        step =
+            model.journeyStep
+    in
+    if Journey.isStart step then
+        printStepOpen
+            UpdateStartStep
+            Journey.startGetOptionLabel
+            Journey.startGetOptions
+
+    else
+        printStepOpen
+            UpdateBuildingStep
+            Journey.buildingGetOptionLabel
+            Journey.buildingGetOptions
+
+
 printStepOpen : (option -> Msg) -> (option -> String) -> List option -> Html Msg
 printStepOpen msg labels options =
     let
@@ -92,21 +111,7 @@ view model =
     div []
         [ h1 [] [ text "Your Journey" ]
         , if Journey.isOpenStep model.journeyStep then
-            let
-                step =
-                    model.journeyStep
-            in
-            if Journey.isStart step then
-                printStepOpen
-                    UpdateStartStep
-                    Journey.startGetOptionLabel
-                    Journey.startGetOptions
-
-            else
-                printStepOpen
-                    UpdateBuildingStep
-                    Journey.buildingGetOptionLabel
-                    Journey.buildingGetOptions
+            doForOpenStep model
 
           else
             printStepClose model.journeyStep
