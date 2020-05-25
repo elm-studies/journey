@@ -1,6 +1,7 @@
 module Main exposing (..)
 
 import Browser
+import History as History
 import Html exposing (Html, div, h1, li, text, ul)
 import Html.Events exposing (onClick)
 import Journey as Journey
@@ -8,6 +9,7 @@ import Journey as Journey
 
 type alias Model =
     { journeyStep : Journey.Step
+    , jouneryHistory : History.JourneyHistory
     }
 
 
@@ -54,6 +56,7 @@ update msg model =
 initModel : Model
 initModel =
     { journeyStep = Journey.building
+    , jouneryHistory = History.jouneryHistory
     }
 
 
