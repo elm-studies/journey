@@ -14,6 +14,7 @@ module Journey exposing
     , startGetOptionLabel
     , startGetOptions
     , startUpdate
+    , stepId
     , toggleStepStatus
     )
 
@@ -21,6 +22,10 @@ module Journey exposing
 
 
 type alias StepLabel =
+    String
+
+
+type alias StepId =
     String
 
 
@@ -40,14 +45,14 @@ type Status
 
 
 type Step
-    = StartStep (Selected Start) (Payload String) Status
-    | BuildingStep (Selected Building) (Payload String) Status
+    = StartStep StepId (Selected Start) (Payload String) Status
+    | BuildingStep StepId (Selected Building) (Payload String) Status
 
 
 isStart : Step -> Bool
 isStart step =
     case step of
-        StartStep _ _ _ ->
+        StartStep _ _ _ _ ->
             True
 
         _ ->
@@ -57,7 +62,7 @@ isStart step =
 isBuilding : Step -> Bool
 isBuilding step =
     case step of
-        BuildingStep _ _ _ ->
+        BuildingStep _ _ _ _ ->
             True
 
         _ ->
@@ -67,17 +72,17 @@ isBuilding step =
 isOpenStep : Step -> Bool
 isOpenStep step =
     case step of
-        StartStep _ _ status ->
+        StartStep _ _ _ status ->
             status == Open
 
-        BuildingStep _ _ status ->
+        BuildingStep _ _ _ status ->
             status == Open
 
 
 labelForSelectedOption : Step -> StepLabel
 labelForSelectedOption step =
     case step of
-        StartStep selected _ _ ->
+        StartStep _ selected _ _ ->
             case selected of
                 Selected option ->
                     startGetOptionLabel option
@@ -85,13 +90,23 @@ labelForSelectedOption step =
                 NoSelected ->
                     ""
 
-        BuildingStep selected _ _ ->
+        BuildingStep _ selected _ _ ->
             case selected of
                 Selected option ->
                     buildingGetOptionLabel option
 
                 NoSelected ->
                     ""
+
+
+stepId : Step -> StepId
+stepId step =
+    case step of
+        StartStep id _ _ _ ->
+            id
+
+        BuildingStep id _ _ _ ->
+            id
 
 
 toggleStatus : Status -> Status
@@ -107,15 +122,17 @@ toggleStatus status =
 toggleStepStatus : Step -> Step
 toggleStepStatus step =
     case step of
-        StartStep selected payload status ->
-            StartStep selected
+        StartStep id selected payload status ->
+            StartStep id
+                selected
                 payload
                 (toggleStatus
                     status
                 )
 
-        BuildingStep selected payload status ->
-            BuildingStep selected
+        BuildingStep id selected payload status ->
+            BuildingStep id
+                selected
                 payload
                 (toggleStatus
                     status
@@ -149,14 +166,14 @@ type Start
 
 start : Step
 start =
-    StartStep NoSelected NoVal Open
+    StartStep "start" NoSelected NoVal Open
 
 
 startUpdate : Start -> Step
 startUpdate opt =
     let
         step =
-            \payload -> StartStep (Selected opt) (Payload payload) Close
+            \payload -> StartStep "start" (Selected opt) (Payload payload) Close
     in
     case opt of
         NewConnection ->
@@ -218,14 +235,14 @@ type Building
 
 building : Step
 building =
-    BuildingStep NoSelected NoVal Open
+    BuildingStep "building" NoSelected NoVal Open
 
 
 buildingUpdate : Building -> Step
 buildingUpdate opt =
     let
         step =
-            \payload -> BuildingStep (Selected opt) (Payload payload) Close
+            \payload -> BuildingStep "building" (Selected opt) (Payload payload) Close
     in
     case opt of
         DetachedHouse ->
