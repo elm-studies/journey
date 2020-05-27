@@ -8,8 +8,7 @@ import Journey as Journey
 
 
 type alias Model =
-    { journeyStep : Journey.Step
-    , jouneryHistory : History.JourneyHistory
+    { journeyHistory : History.JourneyHistory
     }
 
 
@@ -25,6 +24,14 @@ init =
     ( initModel, Cmd.none )
 
 
+updateHitoryCurrentStep : Model -> Journey.Step -> Model
+updateHitoryCurrentStep model currentStep =
+    { model
+        | journeyHistory =
+            History.updateCurrentStep currentStep model.journeyHistory
+    }
+
+
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
@@ -32,31 +39,27 @@ update msg model =
             ( initModel, Cmd.none )
 
         UpdateStartStep opt ->
-            ( { model
-                | journeyStep = Journey.startUpdate opt
-              }
+            ( Journey.startUpdate opt
+                |> updateHitoryCurrentStep model
             , Cmd.none
             )
 
         UpdateBuildingStep opt ->
-            ( { model
-                | journeyStep = Journey.buildingUpdate opt
-              }
+            ( Journey.buildingUpdate opt
+                |> updateHitoryCurrentStep model
             , Cmd.none
             )
 
         ToggleStepStatus step ->
-            ( { model
-                | journeyStep = Journey.toggleStepStatus step
-              }
+            ( Journey.toggleStepStatus step
+                |> updateHitoryCurrentStep model
             , Cmd.none
             )
 
 
 initModel : Model
 initModel =
-    { journeyStep = Journey.building
-    , jouneryHistory = History.jouneryHistory
+    { journeyHistory = History.journeyHistory
     }
 
 
@@ -68,7 +71,7 @@ doForOpenStep : Model -> Html Msg
 doForOpenStep model =
     let
         step =
-            model.journeyStep
+            History.getCurrentStep model.journeyHistory
     in
     if Journey.isStart step then
         printStepOpen
@@ -111,13 +114,50 @@ printStepClose journeyStep =
 
 view : Model -> Html Msg
 view model =
+    let
+        step =
+            History.getCurrentStep model.journeyHistory
+
+        visitedSteps =
+            History.getVisitedStep
+                model.journeyHistory
+
+        _ =
+            Debug.log "vs " visitedSteps
+
+        foo =
+            List.map
+                (\s ->
+                    if Journey.isOpenStep s then
+                        doForOpenStep model
+
+                    else
+                        printStepClose s
+                )
+
+        --visitedSteps
+    in
     div []
-        [ h1 [] [ text "Your Journey" ]
-        , if Journey.isOpenStep model.journeyStep then
+        [ h1 []
+            [ text "Your Journey" ]
+        , div []
+            (foo
+                visitedSteps
+            )
+
+        --, List.map
+        --(\s ->
+        --if Journey.isOpenStep s then
+        --doForOpenStep model
+        --else
+        --printStepClose s
+        --)
+        --visitedSteps
+        , if Journey.isOpenStep step then
             doForOpenStep model
 
           else
-            printStepClose model.journeyStep
+            printStepClose step
         ]
 
 

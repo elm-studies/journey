@@ -10,6 +10,7 @@ module Journey exposing
     , isOpenStep
     , isStart
     , labelForSelectedOption
+    , noneStep
     , start
     , startGetOptionLabel
     , startGetOptions
@@ -34,9 +35,9 @@ type Payload value
     | Payload value
 
 
-type Selected id
+type Selected option
     = NoSelected
-    | Selected id
+    | Selected option
 
 
 type Status
@@ -45,7 +46,8 @@ type Status
 
 
 type Step
-    = StartStep StepId (Selected Start) (Payload String) Status
+    = NonStep
+    | StartStep StepId (Selected Start) (Payload String) Status
     | BuildingStep StepId (Selected Building) (Payload String) Status
 
 
@@ -72,6 +74,9 @@ isBuilding step =
 isOpenStep : Step -> Bool
 isOpenStep step =
     case step of
+        NonStep ->
+            False
+
         StartStep _ _ _ status ->
             status == Open
 
@@ -82,6 +87,9 @@ isOpenStep step =
 labelForSelectedOption : Step -> StepLabel
 labelForSelectedOption step =
     case step of
+        NonStep ->
+            ""
+
         StartStep _ selected _ _ ->
             case selected of
                 Selected option ->
@@ -102,6 +110,9 @@ labelForSelectedOption step =
 stepId : Step -> StepId
 stepId step =
     case step of
+        NonStep ->
+            ""
+
         StartStep id _ _ _ ->
             id
 
@@ -122,6 +133,9 @@ toggleStatus status =
 toggleStepStatus : Step -> Step
 toggleStepStatus step =
     case step of
+        NonStep ->
+            NonStep
+
         StartStep id selected payload status ->
             StartStep id
                 selected
@@ -137,6 +151,15 @@ toggleStepStatus step =
                 (toggleStatus
                     status
                 )
+
+
+
+---- DEFAULT Step STEP ----
+
+
+noneStep : Step
+noneStep =
+    NonStep
 
 
 
